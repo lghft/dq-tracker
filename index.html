@@ -57,21 +57,6 @@
             border-radius: 8px;
         }
 
-        .user-badge img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-        }
-
-        .premium-badge {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: #0a0e27;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75em;
-            font-weight: 600;
-        }
-
         .container {
             padding: 30px;
             max-width: 1400px;
@@ -167,12 +152,8 @@
             transition: all 0.3s ease;
         }
 
-        .sort-dropdown:focus {
+        .sort-dropdown:focus, .sort-dropdown:hover {
             outline: none;
-            border-color: #60a5fa;
-        }
-
-        .sort-dropdown:hover {
             border-color: #60a5fa;
         }
 
@@ -236,11 +217,6 @@
             box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
         }
 
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-
         .btn-secondary {
             background: #1e3a8a;
             color: #e0e0e0;
@@ -250,56 +226,6 @@
         .btn-secondary:hover {
             border-color: #60a5fa;
             color: #60a5fa;
-        }
-
-        .confirm-btn {
-            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-        }
-
-        .confirm-btn:hover {
-            transform: translateY(-2px) scale(1.03);
-            filter: brightness(1.1);
-        }
-
-        .confirm-btn.confirm-btn-danger:hover {
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
-        }
-
-        .confirm-btn.confirm-btn-cancel:hover {
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-            border-color: #60a5fa;
-        }
-
-        .confirm-btn:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        /* Resource Stats */
-        .resource-stats {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            padding: 20px;
-            background: linear-gradient(135deg, #0f1535 0%, #1a1f3a 100%);
-            border: 2px solid #1e3a8a;
-            border-radius: 12px;
-        }
-
-        .resource-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .resource-icon {
-            font-size: 1.8em;
-        }
-
-        .resource-count {
-            font-size: 1.2em;
-            color: #60a5fa;
-            font-weight: 600;
         }
 
         /* Table */
@@ -634,25 +560,6 @@
             padding: 60px 20px;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #0f1535;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #1e3a8a;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #60a5fa;
-        }
-
         /* Modal Styles */
         .modal-overlay {
             display: none;
@@ -697,13 +604,6 @@
             color: #e0e0e0;
             margin-bottom: 20px;
             font-size: 1em;
-            transition: all 0.3s ease;
-        }
-
-        .modal-content input:focus {
-            outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
         }
 
         .modal-buttons {
@@ -711,116 +611,20 @@
             gap: 10px;
             justify-content: flex-end;
         }
-
-        .confirm-modal .modal-content {
-            text-align: center;
-        }
-
-        .confirm-modal h2 {
-            font-size: 1.5em;
-            margin-bottom: 12px;
-        }
-
-        .confirm-modal p {
-            color: #e0e0e0;
-            margin-bottom: 30px;
-            font-size: 1.05em;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-
-            .header-left h1 {
-                font-size: 1.4em;
-            }
-
-            .header-right {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            .search-box {
-                width: 100%;
-                min-width: auto;
-            }
-
-            .filter-group {
-                width: 100%;
-            }
-
-            .filter-btn {
-                flex: 1;
-            }
-
-            .action-buttons {
-                width: 100%;
-                justify-content: stretch;
-            }
-
-            .action-buttons .btn {
-                flex: 1;
-                justify-content: center;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            th, td {
-                padding: 12px 8px;
-                font-size: 0.85em;
-            }
-
-            .xp-bar-container {
-                width: 100px;
-            }
-
-            .pagination {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .tabs-container {
-                justify-content: space-between;
-            }
-
-            .tab-button {
-                padding: 10px 12px;
-                font-size: 0.85em;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Login Screen (shown initially) -->
+    <!-- Login Screen -->
     <div id="loginScreen" class="modal-overlay active">
         <div class="modal-content">
             <h1 style="text-align: center; background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; font-size: 2.5em;">⚔️ Game Tracker</h1>
             <p style="color: #888; margin-bottom: 40px; font-size: 1.1em; text-align: center;">Multi-account progression tracker</p>
             <button class="btn btn-primary" onclick="loginWithGithub()" style="padding: 14px 24px; font-size: 1.1em; width: 100%; justify-content: center;">🔐 Login with GitHub</button>
-            <p style="color: #555; margin-top: 30px; font-size: 0.9em; text-align: center;">yeah.</p>
         </div>
     </div>
 
     <!-- Main App -->
     <div id="mainApp" style="display: none;">
-        <!-- Header -->
         <div class="header">
             <div class="header-left">
                 <h1>⚔️ Game Tracker Stat</h1>
@@ -887,7 +691,6 @@
 
             <!-- Accounts Tab -->
             <div class="tab-content-section active" id="tab-accounts">
-                <!-- Table -->
                 <div class="table-container">
                     <table>
                         <thead>
@@ -913,7 +716,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="pagination">
                     <div>
                         <span id="pageInfo">Page 1 of 1</span>
@@ -927,8 +729,11 @@
 
             <!-- Items Tab -->
             <div class="tab-content-section" id="tab-items">
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="itemsSearch" placeholder="Search items by name, type, rarity..." style="width: 100%; padding: 12px 16px; background: #0f1535; border: 2px solid #1e3a8a; border-radius: 8px; color: #e0e0e0; font-size: 0.95em; transition: all 0.3s ease;" onkeyup="filterItems()">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <input type="text" id="itemsSearch" placeholder="Search items by name, type, rarity..." style="flex: 1; min-width: 200px; padding: 12px 16px; background: #0f1535; border: 2px solid #1e3a8a; border-radius: 8px; color: #e0e0e0; font-size: 0.95em;" onkeyup="filterItems()">
+                    <select class="sort-dropdown" id="itemAccountFilter" onchange="filterItems()">
+                        <option value="all">All Accounts</option>
+                    </select>
                 </div>
                 <div class="items-grid" id="itemsGrid">
                     <div class="items-empty">No items found</div>
@@ -944,7 +749,7 @@
         </div>
     </div>
 
-    <!-- New Account Modal -->
+    <!-- Modals -->
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Create New Account</h2>
@@ -956,14 +761,13 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="modal-overlay confirm-modal">
-        <div class="modal-content">
-            <h2 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">⚠️ Confirm Delete</h2>
-            <p id="confirmMessage"></p>
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <h2 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">⚠️ Confirm Delete</h2>
+            <p id="confirmMessage" style="margin-bottom: 20px;"></p>
             <div class="modal-buttons" style="justify-content: center; width: 100%; gap: 12px;">
-                <button class="btn confirm-btn confirm-btn-danger" onclick="confirmDelete()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; flex: 1;">Yes, Delete</button>
-                <button class="btn confirm-btn confirm-btn-cancel" onclick="cancelConfirm()" style="background: #1e3a8a; color: #e0e0e0; border: 1px solid #3b82f6; flex: 1;">No, Cancel</button>
+                <button class="btn btn-danger" onclick="confirmDelete()" style="flex: 1; justify-content: center;">Yes, Delete</button>
+                <button class="btn btn-secondary" onclick="cancelConfirm()" style="flex: 1; justify-content: center;">No, Cancel</button>
             </div>
         </div>
     </div>
@@ -998,35 +802,46 @@
         let currentUser = null;
         let ws = null;
 
-        // GitHub OAuth Configuration
         const GITHUB_CLIENT_ID = 'Ov23liw1GuQWZ5XIfHjI';
         const GITHUB_REDIRECT_URI = window.location.origin + window.location.pathname;
+
+        /* --- Helper Data Resolvers --- */
+        function getAccountOnline(acc) {
+            if (acc.online !== undefined) return Boolean(acc.online);
+            if (acc.isOnline !== undefined) return Boolean(acc.isOnline);
+            if (acc.status !== undefined) return acc.status === 'online' || acc.status === true;
+            return false;
+        }
+
+        function getAccountGems(acc) {
+            return acc.gems ?? acc.resources?.gems ?? acc.progress?.resources?.gems ?? acc.stats?.gems ?? 0;
+        }
+
+        function getAccountXP(acc) {
+            return acc.xp ?? acc.stats?.xp ?? acc.stats?.experience ?? acc.progress?.xp ?? 0;
+        }
+
+        function getAccountGold(acc) {
+            return acc.gold ?? acc.stats?.gold ?? acc.progress?.resources?.gold ?? 0;
+        }
+
+        function getAccountLevel(acc) {
+            return acc.level ?? acc.stats?.level ?? 1;
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const hasOauthCode = new URLSearchParams(window.location.search).has('code');
             checkAuthToken();
             if (!hasOauthCode) {
-                if (!currentUser) {
-                    showLoginScreen();
-                }
+                if (!currentUser) showLoginScreen();
                 fetchAccounts();
                 connectWebSocket();
             }
             document.getElementById('searchInput').addEventListener('input', updateTable);
-            
-            document.addEventListener('keydown', (e) => {
-                const confirmModal = document.getElementById('confirmModal');
-                if (confirmModal.classList.contains('active')) {
-                    if (e.key === 'Enter') confirmDelete();
-                    if (e.key === 'Escape') cancelConfirm();
-                }
-            });
         });
 
         function connectWebSocket() {
-            if (ws) {
-                try { ws.close(); } catch (e) {}
-            }
+            if (ws) { try { ws.close(); } catch (e) {} }
 
             const url = new URL(API_URL);
             const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -1035,14 +850,13 @@
             ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
-                console.log('Connected to WebSocket server');
                 ws.send(JSON.stringify({ type: 'auth', userId }));
             };
 
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    if (message.type === 'account_updated' || message.type === 'stats_update' || message.type === 'sync_success') {
+                    if (['account_updated', 'stats_update', 'sync_success'].includes(message.type)) {
                         fetchAccounts();
                     }
                 } catch (err) {
@@ -1050,15 +864,9 @@
                 }
             };
 
-            ws.onerror = (err) => {
-                console.error('WebSocket error:', err);
-            };
-
             ws.onclose = () => {
                 setTimeout(() => {
-                    if (currentUser || userId !== GUEST_USER_ID) {
-                        connectWebSocket();
-                    }
+                    if (currentUser || userId !== GUEST_USER_ID) connectWebSocket();
                 }, 5000);
             };
         }
@@ -1094,21 +902,10 @@
                 });
 
                 const data = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(data.error || `Login failed (status ${response.status})`);
+                if (!data.user) throw new Error('Failed to get user information');
 
-                if (!response.ok) {
-                    throw new Error(data.error || `Login failed (status ${response.status})`);
-                }
-
-                if (!data.user) {
-                    throw new Error('Failed to get user information');
-                }
-
-                currentUser = {
-                    name: data.user.login,
-                    avatar: data.user.avatar,
-                    id: data.user.id
-                };
-
+                currentUser = { name: data.user.login, avatar: data.user.avatar, id: data.user.id };
                 userId = `github_${currentUser.id}`;
 
                 localStorage.setItem('github_user', JSON.stringify(currentUser));
@@ -1121,7 +918,6 @@
                 fetchAccounts();
                 connectWebSocket();
             } catch (err) {
-                console.error('GitHub auth error:', err);
                 showLoginError('Login failed: ' + err.message);
             }
         }
@@ -1155,17 +951,14 @@
         }
 
         function switchTab(tabName) {
-            document.querySelectorAll('.tab-content-section').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content-section').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
             document.getElementById(`tab-${tabName}`).classList.add('active');
             event.target.classList.add('active');
 
             if (tabName === 'items') {
+                populateAccountFilter();
                 renderItemsTab();
             } else if (tabName === 'logs') {
                 renderLogsTab();
@@ -1176,9 +969,16 @@
             try {
                 const res = await fetch(`${API_URL}/api/accounts/${userId}`);
                 const data = await res.json();
-                accounts = data.accounts || [];
+                const newAccounts = data.accounts || [];
+
+                if (accounts.length > 0) {
+                    checkInventoryChanges(accounts, newAccounts);
+                }
+
+                accounts = newAccounts;
                 updateStats();
                 updateTable();
+                populateAccountFilter();
             } catch (err) {
                 console.error('Error fetching accounts:', err);
                 accounts = [];
@@ -1187,10 +987,32 @@
             }
         }
 
+        /* --- Inventory Comparison Engine --- */
+        function checkInventoryChanges(oldAccs, newAccs) {
+            const oldMap = new Map(oldAccs.map(acc => [acc.accountName, acc.inventory || []]));
+
+            newAccs.forEach(newAcc => {
+                const oldInv = oldMap.get(newAcc.accountName);
+                if (!oldInv) return;
+
+                const newInv = newAcc.inventory || [];
+                
+                // Compare by unique item identifier (id, uuid, or name)
+                const getItemKey = item => item.id || item.uuid || `${item.name}_${item.rarity}`;
+                const oldItemKeys = new Set(oldInv.map(getItemKey));
+
+                newInv.forEach(item => {
+                    if (!oldItemKeys.has(getItemKey(item))) {
+                        addLog('🎒 New Item Acquired', `[${newAcc.accountName}] obtained: ${item.name || 'Unknown Item'} (${item.rarity || 'common'})`);
+                    }
+                });
+            });
+        }
+
         function updateStats() {
-            const totalGold = accounts.reduce((sum, acc) => sum + (acc.stats?.gold || 0), 0);
-            const totalXP = accounts.reduce((sum, acc) => sum + (acc.stats?.xp || 0), 0);
-            const totalOnline = accounts.filter(acc => acc.online).length;
+            const totalGold = accounts.reduce((sum, acc) => sum + getAccountGold(acc), 0);
+            const totalXP = accounts.reduce((sum, acc) => sum + getAccountXP(acc), 0);
+            const totalOnline = accounts.filter(acc => getAccountOnline(acc)).length;
 
             document.getElementById('totalAccounts').textContent = `${accounts.length}/∞`;
             document.getElementById('totalGold').textContent = totalGold.toLocaleString();
@@ -1203,20 +1025,22 @@
             const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             allLogs.unshift({ action, details, time });
             if (allLogs.length > 50) allLogs.pop();
+            if (document.getElementById('tab-logs').classList.contains('active')) {
+                renderLogsTab();
+            }
         }
 
         function getXpProgress(account) {
-            const level = account.stats?.level || 1;
-            const totalXp = account.stats?.xp || 0;
+            const level = getAccountLevel(account);
+            const totalXp = getAccountXP(account);
             const xpForNextLevel = level * 1000;
             const currentLevelXp = totalXp % xpForNextLevel;
-            const progress = Math.min((currentLevelXp / xpForNextLevel) * 100, 100);
-            return progress;
+            return Math.min((currentLevelXp / xpForNextLevel) * 100, 100);
         }
 
         function getXpText(account) {
-            const level = account.stats?.level || 1;
-            const totalXp = account.stats?.xp || 0;
+            const level = getAccountLevel(account);
+            const totalXp = getAccountXP(account);
             const xpForNextLevel = level * 1000;
             const currentLevelXp = totalXp % xpForNextLevel;
             return `${currentLevelXp.toLocaleString()}/${xpForNextLevel.toLocaleString()}`;
@@ -1234,19 +1058,20 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
             let filtered = accounts.filter(acc => {
+                const isOnline = getAccountOnline(acc);
                 const matchesSearch = acc.accountName.toLowerCase().includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || 
-                    (currentFilter === 'online' && acc.online) ||
-                    (currentFilter === 'offline' && !acc.online);
+                    (currentFilter === 'online' && isOnline) ||
+                    (currentFilter === 'offline' && !isOnline);
                 return matchesSearch && matchesFilter;
             });
 
             const sortBy = document.getElementById('sortBy').value;
             filtered.sort((a, b) => {
                 switch(sortBy) {
-                    case 'level': return (b.stats?.level || 0) - (a.stats?.level || 0);
-                    case 'gold': return (b.stats?.gold || 0) - (a.stats?.gold || 0);
-                    case 'xp': return (b.stats?.xp || 0) - (a.stats?.xp || 0);
+                    case 'level': return getAccountLevel(b) - getAccountLevel(a);
+                    case 'gold': return getAccountGold(b) - getAccountGold(a);
+                    case 'xp': return getAccountXP(b) - getAccountXP(a);
                     default: return a.accountName.localeCompare(b.accountName);
                 }
             });
@@ -1265,18 +1090,24 @@
             if (pageAccounts.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="table-empty">No accounts found</td></tr>';
             } else {
-                tbody.innerHTML = pageAccounts.map((acc) => `
+                tbody.innerHTML = pageAccounts.map((acc) => {
+                    const online = getAccountOnline(acc);
+                    const gems = getAccountGems(acc);
+                    const gold = getAccountGold(acc);
+                    const level = getAccountLevel(acc);
+
+                    return `
                     <tr>
                         <td><input type="checkbox" class="account-checkbox"></td>
                         <td>
-                            <span class="status-badge ${acc.online ? 'status-online' : 'status-offline'}">
-                                ${acc.online ? '● Online' : '● Offline'}
+                            <span class="status-badge ${online ? 'status-online' : 'status-offline'}">
+                                ${online ? '● Online' : '● Offline'}
                             </span>
                         </td>
                         <td><span class="account-name">${acc.accountName}</span></td>
-                        <td><span class="level-badge">Lvl ${acc.stats?.level || 0}</span></td>
-                        <td class="stat-cell">💰 ${(acc.stats?.gold || 0).toLocaleString()}</td>
-                        <td class="stat-cell">💎 ${(acc.resources?.gems || acc.progress?.resources?.gems || 0).toLocaleString()}</td>
+                        <td><span class="level-badge">Lvl ${level}</span></td>
+                        <td class="stat-cell">💰 ${gold.toLocaleString()}</td>
+                        <td class="stat-cell">💎 ${gems.toLocaleString()}</td>
                         <td class="stat-cell">
                             <div class="xp-bar-container">
                                 <div class="xp-bar">
@@ -1293,11 +1124,29 @@
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                `}).join('');
             }
 
             const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
             document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        }
+
+        /* --- Items Tab with Individual Account Dropdown Filter --- */
+        function populateAccountFilter() {
+            const dropdown = document.getElementById('itemAccountFilter');
+            if (!dropdown) return;
+
+            const selectedValue = dropdown.value;
+            dropdown.innerHTML = '<option value="all">All Accounts</option>';
+            
+            accounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.accountName;
+                opt.textContent = acc.accountName;
+                dropdown.appendChild(opt);
+            });
+
+            dropdown.value = selectedValue;
         }
 
         function renderItemsTab() {
@@ -1318,15 +1167,17 @@
 
         function filterItems() {
             const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
+            const accountFilter = document.getElementById('itemAccountFilter').value;
             const itemsGrid = document.getElementById('itemsGrid');
             
             const filtered = allItems.filter(item => {
+                const matchesAccount = accountFilter === 'all' || item.accountName === accountFilter;
                 const matchesSearch = 
                     (item.name || '').toLowerCase().includes(searchTerm) ||
                     (item.type || '').toLowerCase().includes(searchTerm) ||
                     (item.rarity || '').toLowerCase().includes(searchTerm) ||
                     (item.accountName || '').toLowerCase().includes(searchTerm);
-                return matchesSearch;
+                return matchesAccount && matchesSearch;
             });
 
             if (filtered.length === 0) {
@@ -1371,7 +1222,6 @@
 
         function renderLogsTab() {
             const logsContainer = document.getElementById('logsContainer');
-            
             if (allLogs.length === 0) {
                 logsContainer.innerHTML = '<div class="logs-empty">No action logs yet</div>';
                 return;
@@ -1389,8 +1239,7 @@
         }
 
         function sortTable(field) {
-            const sortBy = document.getElementById('sortBy');
-            sortBy.value = field;
+            document.getElementById('sortBy').value = field;
             updateTable();
         }
 
@@ -1399,7 +1248,6 @@
             if (currentPage < totalPages) {
                 currentPage++;
                 renderTable();
-                window.scrollTo(0, 0);
             }
         }
 
@@ -1407,7 +1255,6 @@
             if (currentPage > 1) {
                 currentPage--;
                 renderTable();
-                window.scrollTo(0, 0);
             }
         }
 
@@ -1415,16 +1262,7 @@
             const acc = accounts[index];
             if (!acc) return;
             addLog('👁 Account Viewed', `Inspected: ${acc.accountName}`);
-            const details = `
-Account: ${acc.accountName}
-Level: ${acc.stats?.level || 0}
-Gold: ${(acc.stats?.gold || 0).toLocaleString()}
-XP: ${(acc.stats?.xp || 0).toLocaleString()}
-Gems: ${(acc.resources?.gems || acc.progress?.resources?.gems || 0).toLocaleString()}
-Items: ${acc.inventory?.length || 0}
-Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
-            `.trim();
-            alert(details);
+            alert(`Account: ${acc.accountName}\nLevel: ${getAccountLevel(acc)}\nGold: ${getAccountGold(acc).toLocaleString()}\nXP: ${getAccountXP(acc).toLocaleString()}\nGems: ${getAccountGems(acc).toLocaleString()}\nItems: ${acc.inventory?.length || 0}\nStatus: ${getAccountOnline(acc) ? '🟢 Online' : '🔴 Offline'}`);
         }
 
         let pendingDeleteIndex = null;
@@ -1437,11 +1275,8 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         function confirmDelete() {
             document.getElementById('confirmModal').classList.remove('active');
             if (pendingDeleteIndex !== null) {
-                if (pendingDeleteIndex === 'all') {
-                    performDeleteAll();
-                } else {
-                    performDeleteAccount(pendingDeleteIndex);
-                }
+                if (pendingDeleteIndex === 'all') performDeleteAll();
+                else performDeleteAccount(pendingDeleteIndex);
             }
             pendingDeleteIndex = null;
         }
@@ -1456,48 +1291,29 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
             if (!acc) return;
 
             try {
-                const res = await fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, {
-                    method: 'DELETE'
-                });
-
-                if (!res.ok) {
-                    throw new Error(`Failed to delete account: ${res.statusText}`);
-                }
-
+                const res = await fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error(`Failed to delete: ${res.statusText}`);
                 addLog('🗑 Account Deleted', `Removed account: ${acc.accountName}`);
                 await fetchAccounts();
             } catch (err) {
-                console.error('Error deleting account:', err);
-                alert('Failed to delete account from database.');
+                alert('Failed to delete account.');
             }
         }
 
         async function performDeleteAll() {
-            const count = accounts.length;
-            if (count === 0) return;
-
+            if (accounts.length === 0) return;
             try {
-                await Promise.all(
-                    accounts.map(acc =>
-                        fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, {
-                            method: 'DELETE'
-                        })
-                    )
-                );
-
-                addLog('⚠️ Bulk Delete', `Deleted all ${count} accounts`);
+                await Promise.all(accounts.map(acc => fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, { method: 'DELETE' })));
+                addLog('⚠️ Bulk Delete', `Deleted all accounts`);
                 await fetchAccounts();
             } catch (err) {
-                console.error('Error deleting all accounts:', err);
-                alert('Failed to delete all accounts from database.');
+                alert('Failed to delete all accounts.');
             }
         }
 
         function deleteAccount(index) {
-            const acc = accounts[index];
-            if (!acc) return;
             pendingDeleteIndex = index;
-            showConfirmation(`Delete ${acc.accountName}?`);
+            showConfirmation(`Delete ${accounts[index]?.accountName}?`);
         }
 
         function deleteAllAccounts() {
@@ -1511,24 +1327,19 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         function exportToSheet() {
-            if (accounts.length === 0) {
-                alert('No accounts to export');
-                return;
-            }
+            if (accounts.length === 0) return alert('No accounts to export');
 
             const data = accounts.map(acc => ({
                 Account: acc.accountName,
-                Level: acc.stats?.level || 0,
-                Gold: acc.stats?.gold || 0,
-                XP: acc.stats?.xp || 0,
+                Level: getAccountLevel(acc),
+                Gold: getAccountGold(acc),
+                XP: getAccountXP(acc),
+                Gems: getAccountGems(acc),
                 Items: acc.inventory?.length || 0,
-                Status: acc.online ? 'Online' : 'Offline'
+                Status: getAccountOnline(acc) ? 'Online' : 'Offline'
             }));
 
-            const csv = [Object.keys(data[0]), ...data.map(obj => Object.values(obj))]
-                .map(row => row.join(','))
-                .join('\n');
-
+            const csv = [Object.keys(data[0]), ...data.map(obj => Object.values(obj))].map(row => row.join(',')).join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1550,18 +1361,16 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         async function createNewAccount() {
-            const accountNameInput = document.getElementById('newAccountName');
-            const accountName = accountNameInput.value.trim();
-            if (!accountName) {
-                alert('Please enter an account name');
-                return;
-            }
+            const nameInput = document.getElementById('newAccountName');
+            const accountName = nameInput.value.trim();
+            if (!accountName) return alert('Please enter an account name');
 
             const newAccount = {
                 accountName,
+                online: false,
                 stats: { gold: 0, xp: 0, level: 1 },
                 inventory: [],
-                progress: { resources: { gems: 0, stars: 0, crystals: 0, dice: 0, shards: 0 } }
+                progress: { resources: { gems: 0, stars: 0, crystals: 0 } }
             };
 
             try {
@@ -1570,17 +1379,13 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newAccount)
                 });
-
-                if (!res.ok) {
-                    throw new Error(`Failed to create account: ${res.statusText}`);
-                }
+                if (!res.ok) throw new Error(`Failed to create account: ${res.statusText}`);
 
                 addLog('➕ Account Created', `New account: ${accountName}`);
                 closeModal();
                 await fetchAccounts();
             } catch (err) {
-                console.error('Error creating account:', err);
-                alert('Failed to save account to database.');
+                alert('Failed to save account.');
             }
         }
     </script>
