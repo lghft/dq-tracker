@@ -1165,78 +1165,95 @@
             filterItems();
         }
 
-        function filterItems() {
-            const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
-            const accountFilter = document.getElementById('itemAccountFilter').value;
-            const itemsGrid = document.getElementById('itemsGrid');
-            
-            const filtered = allItems.filter(item => {
-                const matchesAccount = accountFilter === 'all' || item.accountName === accountFilter;
-                const matchesSearch = 
-                    (item.name || '').toLowerCase().includes(searchTerm) ||
-                    (item.type || '').toLowerCase().includes(searchTerm) ||
-                    (item.rarity || '').toLowerCase().includes(searchTerm) ||
-                    (item.accountName || '').toLowerCase().includes(searchTerm);
-                return matchesAccount && matchesSearch;
-            });
-        
-            if (filtered.length === 0) {
-                itemsGrid.innerHTML = '<div class="items-empty">No items found</div>';
-                return;
+        function calculateUpgradeCost(level) {
+            if (level === 0) return 100;
+            if (level > 466) return 100000;
+            let cost = 100;
+            for (let i = 1; i <= level; i++) {
+                const next = cost * 1.06 + 50;
+                cost = (next - cost > 220) ? cost + 220 : next;
             }
-        
-            itemsGrid.innerHTML = filtered.map(item => {
-                const isAbility = item.type === 'abilities';
-                const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
-                const currentUpgrade = item.currentUpgrade || 0;
-                const maxUpgrades = item.maxUpgrades || 0;
-                const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
-                const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
-        
-                const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
-        
-                let potValue = 0;
-                let upgradeCost = 0;
-        
-                if (!isAbility && isHighRarity && !isMaxed) {
-                    // Potential Stat (+10 per remaining upgrade)
-                    if (baseStat > 0) {
-                        potValue = baseStat + (remainingUpgrades * 10);
-                    }
-        
-                    // Total Upgrade Cost (Uses direct upgradeCost property if provided by item data)
-                    if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
-                        upgradeCost = item.upgradeCost;
-                    } else if (item.costPerUpgrade) {
-                        upgradeCost = item.costPerUpgrade * remainingUpgrades;
-                    } else if (item.sellPrice) {
-                        upgradeCost = Math.ceil(item.sellPrice * 0.75) * remainingUpgrades;
-                    }
-                }
-        
-                return `
-                    <div class="item-card">
-                        <div class="item-header">
-                            <div class="item-name">${item.name || 'Unknown Item'} ${item.equipped ? '✓' : ''}</div>
-                            <div class="item-rarity">${item.rarity || 'common'}</div>
-                        </div>
-                        <div class="item-details">
-                            <div><strong>${(item.type || '').toUpperCase()}</strong></div>
-                            <div>Account: <strong>${item.accountName}</strong></div>
-                            <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
-                            ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage.toLocaleString()}</strong></div>` : ''}
-                            ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower.toLocaleString()}</strong></div>` : ''}
-                            ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower.toLocaleString()}</strong></div>` : ''}
-                            ${item.health ? `<div>Health: <strong>${item.health.toLocaleString()}</strong></div>` : ''}
-                            ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade.toLocaleString()}/${maxUpgrades.toLocaleString()}</strong></div>` : ''}
-                            ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
-                            ${potValue ? `<div>Pot Value: <strong>⚔️ ${potValue.toLocaleString()}</strong></div>` : ''}
-                            ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            return Math.floor(Math.min(cost, 100000));
         }
+        
+        function getTotalUpgradeCost(startLevel, totalUpgrades) {
+            let total = 0;
+            for (let i = startLevel; i < totalUpgrades; i++) {
+                total += calculateUpgradeCost(i);
+            }
+            return total;
+        }
+        
+        function filterItems() {
+                const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
+                const accountFilter = document.getElementById('itemAccountFilter').value;
+                const itemsGrid = document.getElementById('itemsGrid');
+                
+                const filtered = allItems.filter(item => {
+                    const matchesAccount = accountFilter === 'all' || item.accountName === accountFilter;
+                    const matchesSearch = 
+                        (item.name || '').toLowerCase().includes(searchTerm) ||
+                        (item.type || '').toLowerCase().includes(searchTerm) ||
+                        (item.rarity || '').toLowerCase().includes(searchTerm) ||
+                        (item.accountName || '').toLowerCase().includes(searchTerm);
+                    return matchesAccount && matchesSearch;
+                });
+            
+                if (filtered.length === 0) {
+                    itemsGrid.innerHTML = '<div class="items-empty">No items found</div>';
+                    return;
+                }
+            
+                itemsGrid.innerHTML = filtered.map(item => {
+                    const isAbility = item.type === 'abilities';
+                    const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
+                    const currentUpgrade = item.currentUpgrade || item.current_upgrade || 0;
+                    const maxUpgrades = item.maxUpgrades || item.max_upgrades || 0;
+                    const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
+                    const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
+            
+                    const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
+            
+                    let potValue = 0;
+                    let upgradeCost = 0;
+            
+                    if (!isAbility && isHighRarity && !isMaxed) {
+                        // Potential Stat (+10 per remaining upgrade)
+                        if (baseStat > 0) {
+                            potValue = baseStat + (remainingUpgrades * 10);
+                        }
+            
+                        // Total Upgrade Cost via Dungeon Quest Blacksmith formula
+                        if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
+                            upgradeCost = item.upgradeCost;
+                        } else {
+                            upgradeCost = getTotalUpgradeCost(currentUpgrade, maxUpgrades);
+                        }
+                    }
+            
+                    return `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div class="item-name">${item.name || 'Unknown Item'} ${item.equipped ? '✓' : ''}</div>
+                                <div class="item-rarity">${item.rarity || 'common'}</div>
+                            </div>
+                            <div class="item-details">
+                                <div><strong>${(item.type || '').toUpperCase()}</strong></div>
+                                <div>Account: <strong>${item.accountName}</strong></div>
+                                <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
+                                ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage.toLocaleString()}</strong></div>` : ''}
+                                ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower.toLocaleString()}</strong></div>` : ''}
+                                ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower.toLocaleString()}</strong></div>` : ''}
+                                ${item.health ? `<div>Health: <strong>${item.health.toLocaleString()}</strong></div>` : ''}
+                                ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade.toLocaleString()}/${maxUpgrades.toLocaleString()}</strong></div>` : ''}
+                                ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
+                                ${potValue ? `<div>Pot Value: <strong>⚔️ ${potValue.toLocaleString()}</strong></div>` : ''}
+                                ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
 
         function renderLogsTab() {
             const logsContainer = document.getElementById('logsContainer');
