@@ -167,6 +167,11 @@
             transition: all 0.3s ease;
         }
 
+        .sort-dropdown:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
         .sort-dropdown:hover {
             border-color: #60a5fa;
         }
@@ -187,6 +192,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            white-space: nowrap;
         }
 
         .filter-btn:hover {
@@ -203,6 +209,7 @@
         .action-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -216,6 +223,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .btn-primary {
@@ -231,6 +239,17 @@
         .btn-danger {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
+        }
+
+        .btn-secondary {
+            background: #1e3a8a;
+            color: #e0e0e0;
+            border: 1px solid #3b82f6;
+        }
+
+        .btn-secondary:hover {
+            border-color: #60a5fa;
+            color: #60a5fa;
         }
 
         .confirm-btn {
@@ -478,6 +497,7 @@
             margin-bottom: 25px;
             border-bottom: 2px solid #1e3a8a;
             padding-bottom: 0;
+            flex-wrap: wrap;
         }
 
         .tab-button {
@@ -490,6 +510,7 @@
             font-size: 0.95em;
             font-weight: 600;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .tab-button:hover {
@@ -604,6 +625,7 @@
             font-size: 0.85em;
             text-align: right;
             min-width: 80px;
+            margin-left: 20px;
         }
 
         .logs-empty {
@@ -631,9 +653,98 @@
             background: #60a5fa;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0f1535 0%, #1a1f3a 100%);
+            border: 2px solid #1e3a8a;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-content h2 {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0e27;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .confirm-modal .modal-content {
+            text-align: center;
+        }
+
+        .confirm-modal h2 {
+            font-size: 1.5em;
+            margin-bottom: 12px;
+        }
+
+        .confirm-modal p {
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            font-size: 1.05em;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .header-left h1 {
+                font-size: 1.4em;
+            }
+
+            .header-right {
+                width: 100%;
+                flex-direction: column;
             }
 
             .stats-grid {
@@ -645,7 +756,26 @@
             }
 
             .search-box {
-                min-width: 100%;
+                width: 100%;
+                min-width: auto;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-btn {
+                flex: 1;
+            }
+
+            .action-buttons {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+                justify-content: center;
             }
 
             .table-container {
@@ -656,178 +786,196 @@
                 padding: 12px 8px;
                 font-size: 0.85em;
             }
+
+            .xp-bar-container {
+                width: 100px;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tabs-container {
+                justify-content: space-between;
+            }
+
+            .tab-button {
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Login Screen (shown initially) -->
-    <div id="loginScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-        <div style="text-align: center; padding: 40px; background: rgba(15, 21, 53, 0.8); border: 2px solid #1e3a8a; border-radius: 16px; max-width: 400px;">
-            <h1 style="background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; font-size: 2.5em;">⚔️ Game Tracker</h1>
-            <p style="color: #888; margin-bottom: 40px; font-size: 1.1em;">Multi-account progression tracker</p>
-            <button class="btn btn-primary" onclick="loginWithGithub()" style="padding: 14px 24px; font-size: 1.1em; width: 100%;">🔐 Login with GitHub</button>
-            <p style="color: #555; margin-top: 30px; font-size: 0.9em;">yeah.</p>
+    <div id="loginScreen" class="modal-overlay active">
+        <div class="modal-content">
+            <h1 style="text-align: center; background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; font-size: 2.5em;">⚔️ Game Tracker</h1>
+            <p style="color: #888; margin-bottom: 40px; font-size: 1.1em; text-align: center;">Multi-account progression tracker</p>
+            <button class="btn btn-primary" onclick="loginWithGithub()" style="padding: 14px 24px; font-size: 1.1em; width: 100%; justify-content: center;">🔐 Login with GitHub</button>
+            <p style="color: #555; margin-top: 30px; font-size: 0.9em; text-align: center;">yeah.</p>
         </div>
     </div>
 
-    <!-- Main App (hidden until logged in) -->
+    <!-- Main App -->
     <div id="mainApp" style="display: none;">
-        <div class="header-left">
-            <h1>⚔️ Game Tracker Stat</h1>
-            <p>Multi-account progression tracker</p>
-        </div>
-        <div class="header-right">
-            <div class="user-badge">
-                <span id="userDisplay">👤 Not logged in</span>
-                <button class="btn btn-primary" id="authBtn" onclick="loginWithGithub()" style="padding: 6px 12px; margin-left: 10px;">Login with GitHub</button>
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>⚔️ Game Tracker Stat</h1>
+                <p>Multi-account progression tracker</p>
+            </div>
+            <div class="header-right">
+                <div class="user-badge">
+                    <span id="userDisplay">👤 Not logged in</span>
+                </div>
+                <button class="btn btn-secondary" id="authBtn" onclick="loginWithGithub()">Login</button>
             </div>
         </div>
-    </div>
 
-    <div class="container">
-        <!-- Stats Overview -->
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-label">Total Accounts</div>
-                <div class="stat-value" id="totalAccounts">0/∞</div>
-                <div class="stat-action">
-                    <button onclick="deleteAllAccounts()">⊘ Delete all</button>
+        <div class="container">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Total Accounts</div>
+                    <div class="stat-value" id="totalAccounts">0/∞</div>
+                    <div class="stat-action">
+                        <button onclick="deleteAllAccounts()">⊘ Delete all</button>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total Gold</div>
+                    <div class="stat-value" id="totalGold">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Total XP</div>
+                    <div class="stat-value" id="totalXP">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Accounts Online</div>
+                    <div class="stat-value" id="totalOnline">0</div>
                 </div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Total Gold</div>
-                <div class="stat-value" id="totalGold">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Total XP</div>
-                <div class="stat-value" id="totalXP">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Accounts Online</div>
-                <div class="stat-value" id="totalOnline">0</div>
-            </div>
-        </div>
 
-        <!-- Controls -->
-        <div class="controls">
-            <input type="text" class="search-box" id="searchInput" placeholder="Search accounts...">
-            <select class="sort-dropdown" id="sortBy" onchange="updateTable()">
-                <option value="name">Sort by Name</option>
-                <option value="level">Sort by Level</option>
-                <option value="gold">Sort by Gold</option>
-                <option value="xp">Sort by XP</option>
-            </select>
-            <div class="filter-group">
-                <button class="filter-btn active" onclick="filterAccounts('all')">◉ All</button>
-                <button class="filter-btn" onclick="filterAccounts('online')">◌ Online</button>
-                <button class="filter-btn" onclick="filterAccounts('offline')">◌ Offline</button>
-            </div>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="exportToSheet()">📊 Export to Sheets</button>
-                <button class="btn btn-primary" onclick="openNewAccountModal()">➕ New Account</button>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs-container">
-            <button class="tab-button active" onclick="switchTab('accounts')">📊 Accounts</button>
-            <button class="tab-button" onclick="switchTab('items')">🎁 Items</button>
-            <button class="tab-button" onclick="switchTab('logs')">📜 Actions/Logs</button>
-        </div>
-
-        <!-- Accounts Tab -->
-        <div class="tab-content-section active" id="tab-accounts">
-            <!-- Table -->
-            <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30px;">
-                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                        </th>
-                        <th onclick="sortTable('status')">Status ↑</th>
-                        <th onclick="sortTable('name')">Account Name</th>
-                        <th onclick="sortTable('level')">Level</th>
-                        <th onclick="sortTable('gold')">Gold</th>
-                        <th>Gems</th>
-                        <th onclick="sortTable('xp')">Experience</th>
-                        <th>Items</th>
-                        <th style="width: 100px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr>
-                        <td colspan="9" class="table-empty">Loading accounts...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-            <!-- Pagination -->
-            <div class="pagination">
-                <div>
-                    <span id="pageInfo">Page 1 of 1</span>
+            <!-- Controls -->
+            <div class="controls">
+                <input type="text" class="search-box" id="searchInput" placeholder="Search accounts...">
+                <select class="sort-dropdown" id="sortBy" onchange="updateTable()">
+                    <option value="name">Sort by Name</option>
+                    <option value="level">Sort by Level</option>
+                    <option value="gold">Sort by Gold</option>
+                    <option value="xp">Sort by XP</option>
+                </select>
+                <div class="filter-group">
+                    <button class="filter-btn active" onclick="filterAccounts('all')">◉ All</button>
+                    <button class="filter-btn" onclick="filterAccounts('online')">◌ Online</button>
+                    <button class="filter-btn" onclick="filterAccounts('offline')">◌ Offline</button>
                 </div>
-                <div class="pagination-buttons">
-                    <button class="pagination-btn" onclick="previousPage()">← Previous</button>
-                    <button class="pagination-btn" onclick="nextPage()">Next →</button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="exportToSheet()">📊 Export to Sheets</button>
+                    <button class="btn btn-primary" onclick="openNewAccountModal()">➕ New Account</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Items Tab -->
-        <div class="tab-content-section" id="tab-items">
-            <div style="margin-bottom: 20px;">
-                <input type="text" id="itemsSearch" placeholder="Search items by name, type, rarity..." style="width: 100%; padding: 12px 16px; background: #0f1535; border: 2px solid #1e3a8a; border-radius: 8px; color: #e0e0e0; font-size: 0.95em; transition: all 0.3s ease;" onkeyup="filterItems()">
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <button class="tab-button active" onclick="switchTab('accounts')">📊 Accounts</button>
+                <button class="tab-button" onclick="switchTab('items')">🎁 Items</button>
+                <button class="tab-button" onclick="switchTab('logs')">📜 Actions/Logs</button>
             </div>
-            <div class="items-grid" id="itemsGrid">
-                <div class="items-empty">No items found</div>
-            </div>
-        </div>
 
-        <!-- Logs Tab -->
-        <div class="tab-content-section" id="tab-logs">
-            <div class="logs-container" id="logsContainer">
-                <div class="logs-empty">No logs found</div>
+            <!-- Accounts Tab -->
+            <div class="tab-content-section active" id="tab-accounts">
+                <!-- Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;">
+                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                </th>
+                                <th onclick="sortTable('status')">Status ↑</th>
+                                <th onclick="sortTable('name')">Account Name</th>
+                                <th onclick="sortTable('level')">Level</th>
+                                <th onclick="sortTable('gold')">Gold</th>
+                                <th>Gems</th>
+                                <th onclick="sortTable('xp')">Experience</th>
+                                <th>Items</th>
+                                <th style="width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="9" class="table-empty">Loading accounts...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <div>
+                        <span id="pageInfo">Page 1 of 1</span>
+                    </div>
+                    <div class="pagination-buttons">
+                        <button class="pagination-btn" onclick="previousPage()">← Previous</button>
+                        <button class="pagination-btn" onclick="nextPage()">Next →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Tab -->
+            <div class="tab-content-section" id="tab-items">
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="itemsSearch" placeholder="Search items by name, type, rarity..." style="width: 100%; padding: 12px 16px; background: #0f1535; border: 2px solid #1e3a8a; border-radius: 8px; color: #e0e0e0; font-size: 0.95em; transition: all 0.3s ease;" onkeyup="filterItems()">
+                </div>
+                <div class="items-grid" id="itemsGrid">
+                    <div class="items-empty">No items found</div>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-content-section" id="tab-logs">
+                <div class="logs-container" id="logsContainer">
+                    <div class="logs-empty">No logs found</div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- New Account Modal -->
-    <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: linear-gradient(135deg, #0f1535 0%, #1a1f3a 100%); border: 2px solid #1e3a8a; border-radius: 12px; padding: 30px; width: 90%; max-width: 500px;">
-            <h2 style="background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px;">Create New Account</h2>
-            <input type="text" id="newAccountName" placeholder="Account Name" style="width: 100%; padding: 12px; background: #0a0e27; border: 2px solid #1e3a8a; border-radius: 8px; color: #e0e0e0; margin-bottom: 20px; font-size: 1em;">
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn" onclick="closeModal()" style="background: #1e3a8a; color: #e0e0e0; border: 1px solid #3b82f6;">Cancel</button>
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Create New Account</h2>
+            <input type="text" id="newAccountName" placeholder="Account Name">
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createNewAccount()">Create</button>
             </div>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1001; align-items: center; justify-content: center;">
-        <div style="background: linear-gradient(135deg, #0f1535 0%, #1a1f3a 100%); border: 2px solid #1e3a8a; border-radius: 12px; padding: 30px; width: 90%; max-width: 450px; text-align: center;">
-            <h2 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px; font-size: 1.5em;">⚠️ Confirm Delete</h2>
-            <p id="confirmMessage" style="color: #e0e0e0; margin-bottom: 30px; font-size: 1.05em;"></p>
-            <div style="display: flex; gap: 12px; justify-content: center;">
+    <div id="confirmModal" class="modal-overlay confirm-modal">
+        <div class="modal-content">
+            <h2 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">⚠️ Confirm Delete</h2>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons" style="justify-content: center; width: 100%; gap: 12px;">
                 <button class="btn confirm-btn confirm-btn-danger" onclick="confirmDelete()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; flex: 1;">Yes, Delete</button>
                 <button class="btn confirm-btn confirm-btn-cancel" onclick="cancelConfirm()" style="background: #1e3a8a; color: #e0e0e0; border: 1px solid #3b82f6; flex: 1;">No, Cancel</button>
             </div>
         </div>
     </div>
 
-    </div>
-    <!-- End mainApp -->
-
     <script>
         function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginScreen').classList.add('active');
             document.getElementById('mainApp').style.display = 'none';
         }
 
         function showMainApp() {
-            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('loginScreen').classList.remove('active');
             document.getElementById('mainApp').style.display = 'block';
         }
 
@@ -835,7 +983,7 @@
             alert(message);
             showLoginScreen();
         }
-        const API_URL = 'https://dsvdfffdxbcbfdgrfgfd-production.up.railway.app';
+        const API_URL = 'dsvdfffdxbcbfdgrfgfd-production.up.railway.app';
         const GUEST_USER_ID = 'user123'; // fallback bucket used while logged out
         let userId = GUEST_USER_ID;
         
@@ -869,7 +1017,7 @@
             // Keyboard support for confirmation modal
             document.addEventListener('keydown', (e) => {
                 const confirmModal = document.getElementById('confirmModal');
-                if (confirmModal.style.display === 'flex') {
+                if (confirmModal.classList.contains('active')) {
                     if (e.key === 'Enter') confirmDelete();
                     if (e.key === 'Escape') cancelConfirm();
                 }
@@ -956,7 +1104,7 @@
                 showMainApp();
             } else {
                 userDisplay.textContent = '👤 Not logged in';
-                authBtn.textContent = 'Login with GitHub';
+                authBtn.textContent = 'Login';
                 authBtn.onclick = loginWithGithub;
                 showLoginScreen();
             }
@@ -1253,11 +1401,11 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
 
         function showConfirmation(message, callback) {
             document.getElementById('confirmMessage').textContent = message;
-            document.getElementById('confirmModal').style.display = 'flex';
+            document.getElementById('confirmModal').classList.add('active');
         }
 
         function confirmDelete() {
-            document.getElementById('confirmModal').style.display = 'none';
+            document.getElementById('confirmModal').classList.remove('active');
             if (pendingDeleteIndex !== null) {
                 if (pendingDeleteIndex === 'all') {
                     performDeleteAll();
@@ -1269,7 +1417,7 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         function cancelConfirm() {
-            document.getElementById('confirmModal').style.display = 'none';
+            document.getElementById('confirmModal').classList.remove('active');
             pendingDeleteIndex = null;
         }
 
@@ -1330,12 +1478,12 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         function openNewAccountModal() {
-            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modal').classList.add('active');
             document.getElementById('newAccountName').focus();
         }
 
         function closeModal() {
-            document.getElementById('modal').style.display = 'none';
+            document.getElementById('modal').classList.remove('active');
             document.getElementById('newAccountName').value = '';
         }
 
