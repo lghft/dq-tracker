@@ -742,6 +742,9 @@
 
             <!-- Logs Tab -->
             <div class="tab-content-section" id="tab-logs">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                    <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+                </div>
                 <div class="logs-container" id="logsContainer">
                     <div class="logs-empty">No logs found</div>
                 </div>
@@ -1046,6 +1049,11 @@
             if (document.getElementById('tab-logs').classList.contains('active')) {
                 renderLogsTab();
             }
+        }
+
+        function clearLogs() {
+            allLogs = [];
+            renderLogsTab();
         }
 
         function getXpProgress(account) {
