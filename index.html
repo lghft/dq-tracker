@@ -660,7 +660,18 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <!-- Login Screen (shown initially) -->
+    <div id="loginScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+        <div style="text-align: center; padding: 40px; background: rgba(15, 21, 53, 0.8); border: 2px solid #1e3a8a; border-radius: 16px; max-width: 400px;">
+            <h1 style="background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; font-size: 2.5em;">⚔️ Game Tracker</h1>
+            <p style="color: #888; margin-bottom: 40px; font-size: 1.1em;">Multi-account progression tracker</p>
+            <button class="btn btn-primary" onclick="loginWithGithub()" style="padding: 14px 24px; font-size: 1.1em; width: 100%;">🔐 Login with GitHub</button>
+            <p style="color: #555; margin-top: 30px; font-size: 0.9em;">yeah.</p>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until logged in) -->
+    <div id="mainApp" style="display: none;">
         <div class="header-left">
             <h1>⚔️ Game Tracker Stat</h1>
             <p>Multi-account progression tracker</p>
@@ -806,8 +817,24 @@
         </div>
     </div>
 
+    </div>
+    <!-- End mainApp -->
+
     <script>
-        const API_URL = 'https://outrageous-nocturnal-applicationstack--kevindinh616.replit.app';
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+        }
+
+        function showLoginError(message) {
+            alert(message);
+            showLoginScreen();
+        }
         const GUEST_USER_ID = 'user123'; // fallback bucket used while logged out
         let userId = GUEST_USER_ID;
 
@@ -830,6 +857,10 @@
             // If we're mid-OAuth-exchange, exchangeCodeForToken() will call
             // fetchAccounts() itself once it knows who's logged in.
             if (!hasOauthCode) {
+                // Show login screen if not authenticated
+                if (!currentUser) {
+                    showLoginScreen();
+                }
                 fetchAccounts();
             }
             document.getElementById('searchInput').addEventListener('input', updateTable);
@@ -880,8 +911,13 @@
 
                 const data = await response.json().catch(() => ({}));
 
-                if (!response.ok || !data.user) {
+                if (!response.ok) {
+                    // Backend rejected the login (e.g., not the creator)
                     throw new Error(data.error || `Login failed (status ${response.status})`);
+                }
+
+                if (!data.user) {
+                    throw new Error('Failed to get user information');
                 }
 
                 currentUser = {
@@ -904,7 +940,7 @@
                 fetchAccounts();
             } catch (err) {
                 console.error('GitHub auth error:', err);
-                alert('GitHub login failed: ' + err.message);
+                showLoginError('Login failed: ' + err.message);
             }
         }
 
@@ -916,10 +952,12 @@
                 userDisplay.innerHTML = `👤 ${currentUser.name}`;
                 authBtn.textContent = 'Logout';
                 authBtn.onclick = logout;
+                showMainApp();
             } else {
                 userDisplay.textContent = '👤 Not logged in';
                 authBtn.textContent = 'Login with GitHub';
                 authBtn.onclick = loginWithGithub;
+                showLoginScreen();
             }
         }
 
@@ -930,7 +968,7 @@
             userId = GUEST_USER_ID;
             updateUserDisplay();
             addLog('🚪 Logout', 'User logged out');
-            fetchAccounts();
+            showLoginScreen();
         }
 
         function switchTab(tabName) {
