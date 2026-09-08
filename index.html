@@ -1165,7 +1165,7 @@
             filterItems();
         }
 
-       function filterItems() {
+        function filterItems() {
             const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
             const accountFilter = document.getElementById('itemAccountFilter').value;
             const itemsGrid = document.getElementById('itemsGrid');
@@ -1193,21 +1193,25 @@
                 const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
                 const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
         
-                // Retrieve primary base stat (damage, power, or health)
                 const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
         
                 let potValue = 0;
                 let upgradeCost = 0;
         
                 if (!isAbility && isHighRarity && !isMaxed) {
-                    // Potential Stat = Current Stat + (10 per remaining upgrade)
+                    // Potential Stat (+10 per remaining upgrade)
                     if (baseStat > 0) {
                         potValue = baseStat + (remainingUpgrades * 10);
                     }
         
-                    // Total Upgrade Cost calculation for remaining upgrades
-                    const costPerUpgrade = item.upgradeCost || (item.sellPrice ? Math.ceil(item.sellPrice * 0.75) : 100000);
-                    upgradeCost = costPerUpgrade * remainingUpgrades;
+                    // Total Upgrade Cost (Uses direct upgradeCost property if provided by item data)
+                    if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
+                        upgradeCost = item.upgradeCost;
+                    } else if (item.costPerUpgrade) {
+                        upgradeCost = item.costPerUpgrade * remainingUpgrades;
+                    } else if (item.sellPrice) {
+                        upgradeCost = Math.ceil(item.sellPrice * 0.75) * remainingUpgrades;
+                    }
                 }
         
                 return `
