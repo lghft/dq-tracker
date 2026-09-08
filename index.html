@@ -801,6 +801,7 @@
         let allLogs = [];
         let currentUser = null;
         let ws = null;
+        let autoRefreshInterval = null;
 
         const GITHUB_CLIENT_ID = 'Ov23liw1GuQWZ5XIfHjI';
         const GITHUB_REDIRECT_URI = window.location.origin + window.location.pathname;
@@ -836,9 +837,19 @@
                 if (!currentUser) showLoginScreen();
                 fetchAccounts();
                 connectWebSocket();
+                startAutoRefreshTimer();
             }
             document.getElementById('searchInput').addEventListener('input', updateTable);
         });
+
+        /* --- Auto Refresh Polling Timer --- */
+        function startAutoRefreshTimer() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            // Polling interval auto-refreshes data every 5 seconds
+            autoRefreshInterval = setInterval(() => {
+                fetchAccounts();
+            }, 5000);
+        }
 
         function connectWebSocket() {
             if (ws) { try { ws.close(); } catch (e) {} }
@@ -856,9 +867,8 @@
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    if (['account_updated', 'stats_update', 'sync_success'].includes(message.type)) {
-                        fetchAccounts();
-                    }
+                    // Fetch accounts automatically on any backend event update
+                    fetchAccounts();
                 } catch (err) {
                     console.error('Error handling WS message:', err);
                 }
@@ -917,6 +927,7 @@
 
                 fetchAccounts();
                 connectWebSocket();
+                startAutoRefreshTimer();
             } catch (err) {
                 showLoginError('Login failed: ' + err.message);
             }
@@ -947,6 +958,7 @@
             updateUserDisplay();
             addLog('🚪 Logout', 'User logged out');
             if (ws) ws.close();
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             showLoginScreen();
         }
 
@@ -979,6 +991,12 @@
                 updateStats();
                 updateTable();
                 populateAccountFilter();
+
+                // Dynamically refresh active tab view if open
+                const itemsTab = document.getElementById('tab-items');
+                if (itemsTab && itemsTab.classList.contains('active')) {
+                    renderItemsTab();
+                }
             } catch (err) {
                 console.error('Error fetching accounts:', err);
                 accounts = [];
@@ -1077,7 +1095,6 @@
             });
 
             filteredAccounts = filtered;
-            currentPage = 1;
             renderTable();
         }
 
@@ -1185,75 +1202,75 @@
         }
         
         function filterItems() {
-                const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
-                const accountFilter = document.getElementById('itemAccountFilter').value;
-                const itemsGrid = document.getElementById('itemsGrid');
-                
-                const filtered = allItems.filter(item => {
-                    const matchesAccount = accountFilter === 'all' || item.accountName === accountFilter;
-                    const matchesSearch = 
-                        (item.name || '').toLowerCase().includes(searchTerm) ||
-                        (item.type || '').toLowerCase().includes(searchTerm) ||
-                        (item.rarity || '').toLowerCase().includes(searchTerm) ||
-                        (item.accountName || '').toLowerCase().includes(searchTerm);
-                    return matchesAccount && matchesSearch;
-                });
+            const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
+            const accountFilter = document.getElementById('itemAccountFilter').value;
+            const itemsGrid = document.getElementById('itemsGrid');
             
-                if (filtered.length === 0) {
-                    itemsGrid.innerHTML = '<div class="items-empty">No items found</div>';
-                    return;
-                }
-            
-                itemsGrid.innerHTML = filtered.map(item => {
-                    const isAbility = item.type === 'abilities';
-                    const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
-                    const currentUpgrade = item.currentUpgrade || item.current_upgrade || 0;
-                    const maxUpgrades = item.maxUpgrades || item.max_upgrades || 0;
-                    const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
-                    const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
-            
-                    const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
-            
-                    let potValue = 0;
-                    let upgradeCost = 0;
-            
-                    if (!isAbility && isHighRarity && !isMaxed) {
-                        // Potential Stat (+10 per remaining upgrade)
-                        if (baseStat > 0) {
-                            potValue = baseStat + (remainingUpgrades * 10);
-                        }
-            
-                        // Total Upgrade Cost via Dungeon Quest Blacksmith formula
-                        if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
-                            upgradeCost = item.upgradeCost;
-                        } else {
-                            upgradeCost = getTotalUpgradeCost(currentUpgrade, maxUpgrades);
-                        }
-                    }
-            
-                    return `
-                        <div class="item-card">
-                            <div class="item-header">
-                                <div class="item-name">${item.name || 'Unknown Item'} ${item.equipped ? '✓' : ''}</div>
-                                <div class="item-rarity">${item.rarity || 'common'}</div>
-                            </div>
-                            <div class="item-details">
-                                <div><strong>${(item.type || '').toUpperCase()}</strong></div>
-                                <div>Account: <strong>${item.accountName}</strong></div>
-                                <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
-                                ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage.toLocaleString()}</strong></div>` : ''}
-                                ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower.toLocaleString()}</strong></div>` : ''}
-                                ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower.toLocaleString()}</strong></div>` : ''}
-                                ${item.health ? `<div>Health: <strong>${item.health.toLocaleString()}</strong></div>` : ''}
-                                ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade.toLocaleString()}/${maxUpgrades.toLocaleString()}</strong></div>` : ''}
-                                ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
-                                ${potValue ? `<div>Pot Value: <strong>⚔️ ${potValue.toLocaleString()}</strong></div>` : ''}
-                                ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+            const filtered = allItems.filter(item => {
+                const matchesAccount = accountFilter === 'all' || item.accountName === accountFilter;
+                const matchesSearch = 
+                    (item.name || '').toLowerCase().includes(searchTerm) ||
+                    (item.type || '').toLowerCase().includes(searchTerm) ||
+                    (item.rarity || '').toLowerCase().includes(searchTerm) ||
+                    (item.accountName || '').toLowerCase().includes(searchTerm);
+                return matchesAccount && matchesSearch;
+            });
+        
+            if (filtered.length === 0) {
+                itemsGrid.innerHTML = '<div class="items-empty">No items found</div>';
+                return;
             }
+        
+            itemsGrid.innerHTML = filtered.map(item => {
+                const isAbility = item.type === 'abilities';
+                const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
+                const currentUpgrade = item.currentUpgrade || item.current_upgrade || 0;
+                const maxUpgrades = item.maxUpgrades || item.max_upgrades || 0;
+                const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
+                const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
+        
+                const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
+        
+                let potValue = 0;
+                let upgradeCost = 0;
+        
+                if (!isAbility && isHighRarity && !isMaxed) {
+                    // Potential Stat (+10 per remaining upgrade)
+                    if (baseStat > 0) {
+                        potValue = baseStat + (remainingUpgrades * 10);
+                    }
+        
+                    // Total Upgrade Cost via Dungeon Quest Blacksmith formula
+                    if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
+                        upgradeCost = item.upgradeCost;
+                    } else {
+                        upgradeCost = getTotalUpgradeCost(currentUpgrade, maxUpgrades);
+                    }
+                }
+        
+                return `
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-name">${item.name || 'Unknown Item'} ${item.equipped ? '✓' : ''}</div>
+                            <div class="item-rarity">${item.rarity || 'common'}</div>
+                        </div>
+                        <div class="item-details">
+                            <div><strong>${(item.type || '').toUpperCase()}</strong></div>
+                            <div>Account: <strong>${item.accountName}</strong></div>
+                            <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
+                            ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage.toLocaleString()}</strong></div>` : ''}
+                            ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower.toLocaleString()}</strong></div>` : ''}
+                            ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower.toLocaleString()}</strong></div>` : ''}
+                            ${item.health ? `<div>Health: <strong>${item.health.toLocaleString()}</strong></div>` : ''}
+                            ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade.toLocaleString()}/${maxUpgrades.toLocaleString()}</strong></div>` : ''}
+                            ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
+                            ${potValue ? `<div>Pot Value: <strong>⚔️ ${potValue.toLocaleString()}</strong></div>` : ''}
+                            ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         function renderLogsTab() {
             const logsContainer = document.getElementById('logsContainer');
