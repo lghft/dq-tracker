@@ -1190,14 +1190,24 @@
                 const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
                 const currentUpgrade = item.currentUpgrade || 0;
                 const maxUpgrades = item.maxUpgrades || 0;
-                const isMaxed = maxUpgrades > 0 && currentUpgrade >= maxUpgrades;
+                const remainingUpgrades = Math.max(0, maxUpgrades - currentUpgrade);
+                const isMaxed = maxUpgrades > 0 && remainingUpgrades === 0;
+        
+                // Retrieve primary base stat (damage, power, or health)
+                const baseStat = item.physicalDamage || item.physicalPower || item.spellPower || item.health || 0;
         
                 let potValue = 0;
                 let upgradeCost = 0;
         
-                if (!isAbility && isHighRarity && item.sellPrice && !isMaxed) {
-                    potValue = Math.floor(item.sellPrice * 1.5);
-                    upgradeCost = Math.ceil(item.sellPrice * 0.75 * (currentUpgrade + 1));
+                if (!isAbility && isHighRarity && !isMaxed) {
+                    // Potential Stat = Current Stat + (10 per remaining upgrade)
+                    if (baseStat > 0) {
+                        potValue = baseStat + (remainingUpgrades * 10);
+                    }
+        
+                    // Total Upgrade Cost calculation for remaining upgrades
+                    const costPerUpgrade = item.upgradeCost || (item.sellPrice ? Math.ceil(item.sellPrice * 0.75) : 100000);
+                    upgradeCost = costPerUpgrade * remainingUpgrades;
                 }
         
                 return `
@@ -1210,13 +1220,13 @@
                             <div><strong>${(item.type || '').toUpperCase()}</strong></div>
                             <div>Account: <strong>${item.accountName}</strong></div>
                             <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
-                            ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage}</strong></div>` : ''}
-                            ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower}</strong></div>` : ''}
-                            ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower}</strong></div>` : ''}
-                            ${item.health ? `<div>Health: <strong>${item.health}</strong></div>` : ''}
-                            ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade}/${maxUpgrades}</strong></div>` : ''}
+                            ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage.toLocaleString()}</strong></div>` : ''}
+                            ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower.toLocaleString()}</strong></div>` : ''}
+                            ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower.toLocaleString()}</strong></div>` : ''}
+                            ${item.health ? `<div>Health: <strong>${item.health.toLocaleString()}</strong></div>` : ''}
+                            ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade.toLocaleString()}/${maxUpgrades.toLocaleString()}</strong></div>` : ''}
                             ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
-                            ${potValue ? `<div>Pot Value: <strong>💎 ${potValue.toLocaleString()}</strong></div>` : ''}
+                            ${potValue ? `<div>Pot Value: <strong>⚔️ ${potValue.toLocaleString()}</strong></div>` : ''}
                             ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
                         </div>
                     </div>
