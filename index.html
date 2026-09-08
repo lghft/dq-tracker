@@ -1031,28 +1031,19 @@
         }
 
         function getXpProgress(account) {
-            // Uses xpNeeded from account stats/progress if present, otherwise defaults gracefully
-            const currentXp = account.stats?.xp || 0;
-            const xpNeeded = account.stats?.xpNeeded || account.progress?.xpNeeded || (account.stats?.level || 1) * 1000;
+            const currentXp = getAccountXP(account);
+            const level = getAccountLevel(account);
+            const xpNeeded = account.stats?.xpNeeded || account.progress?.xpNeeded || (level * 1000);
             
             if (!xpNeeded) return 0;
             return Math.min((currentXp / xpNeeded) * 100, 100);
         }
         
         function getXpText(account) {
-            const currentXp = account.stats?.xp || 0;
-            const xpNeeded = account.stats?.xpNeeded || account.progress?.xpNeeded || (account.stats?.level || 1) * 1000;
-            
-            // Formats numbers with commas (e.g., 2.68B / 554.35B or formatted exact numbers)
-            return `${currentXp.toLocaleString()} / ${xpNeeded.toLocaleString()}`;
-        }
-
-        function getXpText(account) {
+            const currentXp = getAccountXP(account);
             const level = getAccountLevel(account);
-            const totalXp = getAccountXP(account);
-            const xpForNextLevel = level * 1000;
-            const currentLevelXp = totalXp % xpForNextLevel;
-            return `${currentLevelXp.toLocaleString()}/${xpForNextLevel.toLocaleString()}`;
+            const xpNeeded = account.stats?.xpNeeded || account.progress?.xpNeeded || (level * 1000);
+            return `${currentXp.toLocaleString()} / ${xpNeeded.toLocaleString()}`;
         }
 
         function filterAccounts(filter) {
