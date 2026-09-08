@@ -1165,7 +1165,7 @@
             filterItems();
         }
 
-        function filterItems() {
+       function filterItems() {
             const searchTerm = document.getElementById('itemsSearch').value.toLowerCase();
             const accountFilter = document.getElementById('itemAccountFilter').value;
             const itemsGrid = document.getElementById('itemsGrid');
@@ -1179,23 +1179,27 @@
                     (item.accountName || '').toLowerCase().includes(searchTerm);
                 return matchesAccount && matchesSearch;
             });
-
+        
             if (filtered.length === 0) {
                 itemsGrid.innerHTML = '<div class="items-empty">No items found</div>';
                 return;
             }
-
+        
             itemsGrid.innerHTML = filtered.map(item => {
                 const isAbility = item.type === 'abilities';
                 const isHighRarity = ['epic', 'legendary', 'ultimate'].includes(item.rarity);
+                const currentUpgrade = item.currentUpgrade || 0;
+                const maxUpgrades = item.maxUpgrades || 0;
+                const isMaxed = maxUpgrades > 0 && currentUpgrade >= maxUpgrades;
+        
                 let potValue = 0;
                 let upgradeCost = 0;
-
-                if (!isAbility && isHighRarity && item.sellPrice) {
+        
+                if (!isAbility && isHighRarity && item.sellPrice && !isMaxed) {
                     potValue = Math.floor(item.sellPrice * 1.5);
-                    upgradeCost = Math.ceil(item.sellPrice * 0.75 * ((item.currentUpgrade || 0) + 1));
+                    upgradeCost = Math.ceil(item.sellPrice * 0.75 * (currentUpgrade + 1));
                 }
-
+        
                 return `
                     <div class="item-card">
                         <div class="item-header">
@@ -1210,7 +1214,7 @@
                             ${item.physicalPower ? `<div>Physical Power: <strong>${item.physicalPower}</strong></div>` : ''}
                             ${item.spellPower ? `<div>Spell Power: <strong>${item.spellPower}</strong></div>` : ''}
                             ${item.health ? `<div>Health: <strong>${item.health}</strong></div>` : ''}
-                            ${!isAbility ? `<div>Upgrade: <strong>${item.currentUpgrade || 0}/${item.maxUpgrades || 0}</strong></div>` : ''}
+                            ${!isAbility ? `<div>Upgrade: <strong>${currentUpgrade}/${maxUpgrades}</strong></div>` : ''}
                             ${item.sellPrice ? `<div>Sell Price: <strong>💰 ${item.sellPrice.toLocaleString()}</strong></div>` : ''}
                             ${potValue ? `<div>Pot Value: <strong>💎 ${potValue.toLocaleString()}</strong></div>` : ''}
                             ${upgradeCost ? `<div>Upgrade Cost: <strong>💰 ${upgradeCost.toLocaleString()}</strong></div>` : ''}
