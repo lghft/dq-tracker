@@ -983,8 +983,9 @@
             alert(message);
             showLoginScreen();
         }
+
         const API_URL = 'https://dsvdfffdxbcbfdgrfgfd-production.up.railway.app';
-        const GUEST_USER_ID = 'user123'; // fallback bucket used while logged out
+        const GUEST_USER_ID = 'user123';
         let userId = GUEST_USER_ID;
         
         let accounts = [];
@@ -995,6 +996,7 @@
         let allItems = [];
         let allLogs = [];
         let currentUser = null;
+        let ws = null;
 
         // GitHub OAuth Configuration
         const GITHUB_CLIENT_ID = 'Ov23liw1GuQWZ5XIfHjI';
@@ -1003,18 +1005,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const hasOauthCode = new URLSearchParams(window.location.search).has('code');
             checkAuthToken();
-            // If we're mid-OAuth-exchange, exchangeCodeForToken() will call
-            // fetchAccounts() itself once it knows who's logged in.
             if (!hasOauthCode) {
-                // Show login screen if not authenticated
                 if (!currentUser) {
                     showLoginScreen();
                 }
                 fetchAccounts();
+                connectWebSocket();
             }
             document.getElementById('searchInput').addEventListener('input', updateTable);
             
-            // Keyboard support for confirmation modal
             document.addEventListener('keydown', (e) => {
                 const confirmModal = document.getElementById('confirmModal');
                 if (confirmModal.classList.contains('active')) {
@@ -1023,6 +1022,46 @@
                 }
             });
         });
+
+        function connectWebSocket() {
+            if (ws) {
+                try { ws.close(); } catch (e) {}
+            }
+
+            const url = new URL(API_URL);
+            const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${url.host}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('Connected to WebSocket server');
+                ws.send(JSON.stringify({ type: 'auth', userId }));
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'account_updated' || message.type === 'stats_update' || message.type === 'sync_success') {
+                        fetchAccounts();
+                    }
+                } catch (err) {
+                    console.error('Error handling WS message:', err);
+                }
+            };
+
+            ws.onerror = (err) => {
+                console.error('WebSocket error:', err);
+            };
+
+            ws.onclose = () => {
+                setTimeout(() => {
+                    if (currentUser || userId !== GUEST_USER_ID) {
+                        connectWebSocket();
+                    }
+                }, 5000);
+            };
+        }
 
         function loginWithGithub() {
             const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_REDIRECT_URI)}&scope=user:email`;
@@ -1036,7 +1075,6 @@
             if (code) {
                 exchangeCodeForToken(code);
             } else {
-                // Restore a previous login from localStorage
                 const user = localStorage.getItem('github_user');
                 const savedUserId = localStorage.getItem('game_tracker_user_id');
                 if (user) {
@@ -1049,9 +1087,6 @@
 
         async function exchangeCodeForToken(code) {
             try {
-                // The actual token exchange happens on the backend, since it
-                // requires the GitHub client_secret which the browser must
-                // never see.
                 const response = await fetch(`${API_URL}/api/auth/github/callback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1061,7 +1096,6 @@
                 const data = await response.json().catch(() => ({}));
 
                 if (!response.ok) {
-                    // Backend rejected the login (e.g., not the creator)
                     throw new Error(data.error || `Login failed (status ${response.status})`);
                 }
 
@@ -1075,7 +1109,6 @@
                     id: data.user.id
                 };
 
-                // Give each GitHub user their own bucket of tracked accounts
                 userId = `github_${currentUser.id}`;
 
                 localStorage.setItem('github_user', JSON.stringify(currentUser));
@@ -1085,8 +1118,8 @@
                 addLog('✅ GitHub Login', `Logged in as ${currentUser.name}`);
                 window.history.replaceState({}, document.title, window.location.pathname);
 
-                // Now that we know who's logged in, load THEIR data
                 fetchAccounts();
+                connectWebSocket();
             } catch (err) {
                 console.error('GitHub auth error:', err);
                 showLoginError('Login failed: ' + err.message);
@@ -1117,11 +1150,11 @@
             userId = GUEST_USER_ID;
             updateUserDisplay();
             addLog('🚪 Logout', 'User logged out');
+            if (ws) ws.close();
             showLoginScreen();
         }
 
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content-section').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -1129,11 +1162,9 @@
                 btn.classList.remove('active');
             });
 
-            // Show selected tab
             document.getElementById(`tab-${tabName}`).classList.add('active');
             event.target.classList.add('active');
 
-            // Load content for selected tab
             if (tabName === 'items') {
                 renderItemsTab();
             } else if (tabName === 'logs') {
@@ -1171,7 +1202,7 @@
             const now = new Date();
             const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             allLogs.unshift({ action, details, time });
-            if (allLogs.length > 50) allLogs.pop(); // Keep last 50 logs
+            if (allLogs.length > 50) allLogs.pop();
         }
 
         function getXpProgress(account) {
@@ -1234,7 +1265,7 @@
             if (pageAccounts.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="table-empty">No accounts found</td></tr>';
             } else {
-                tbody.innerHTML = pageAccounts.map((acc, idx) => `
+                tbody.innerHTML = pageAccounts.map((acc) => `
                     <tr>
                         <td><input type="checkbox" class="account-checkbox"></td>
                         <td>
@@ -1245,7 +1276,7 @@
                         <td><span class="account-name">${acc.accountName}</span></td>
                         <td><span class="level-badge">Lvl ${acc.stats?.level || 0}</span></td>
                         <td class="stat-cell">💰 ${(acc.stats?.gold || 0).toLocaleString()}</td>
-                        <td class="stat-cell">💎 ${(acc.resources?.gems || 0).toLocaleString()}</td>
+                        <td class="stat-cell">💎 ${(acc.resources?.gems || acc.progress?.resources?.gems || 0).toLocaleString()}</td>
                         <td class="stat-cell">
                             <div class="xp-bar-container">
                                 <div class="xp-bar">
@@ -1309,7 +1340,6 @@
                 let potValue = 0;
                 let upgradeCost = 0;
 
-                // Calculate pot and upgrade cost for non-ability high rarity items
                 if (!isAbility && isHighRarity && item.sellPrice) {
                     potValue = Math.floor(item.sellPrice * 1.5);
                     upgradeCost = Math.ceil(item.sellPrice * 0.75 * ((item.currentUpgrade || 0) + 1));
@@ -1322,7 +1352,7 @@
                             <div class="item-rarity">${item.rarity || 'common'}</div>
                         </div>
                         <div class="item-details">
-                            <div><strong>${item.type.toUpperCase()}</strong></div>
+                            <div><strong>${(item.type || '').toUpperCase()}</strong></div>
                             <div>Account: <strong>${item.accountName}</strong></div>
                             <div>Level Req: <strong>${item.levelReq || '—'}</strong></div>
                             ${item.physicalDamage ? `<div>Physical Dmg: <strong>${item.physicalDamage}</strong></div>` : ''}
@@ -1383,15 +1413,15 @@
 
         function viewAccount(index) {
             const acc = accounts[index];
+            if (!acc) return;
             addLog('👁 Account Viewed', `Inspected: ${acc.accountName}`);
             const details = `
 Account: ${acc.accountName}
-Level: ${acc.stats.level}
-Gold: ${acc.stats.gold.toLocaleString()}
-XP: ${acc.stats.xp.toLocaleString()}
-Gems: ${acc.resources.gems}
-Trait Crystals: ${acc.resources.crystals}
-Items: ${acc.inventory.length}
+Level: ${acc.stats?.level || 0}
+Gold: ${(acc.stats?.gold || 0).toLocaleString()}
+XP: ${(acc.stats?.xp || 0).toLocaleString()}
+Gems: ${(acc.resources?.gems || acc.progress?.resources?.gems || 0).toLocaleString()}
+Items: ${acc.inventory?.length || 0}
 Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
             `.trim();
             alert(details);
@@ -1399,7 +1429,7 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
 
         let pendingDeleteIndex = null;
 
-        function showConfirmation(message, callback) {
+        function showConfirmation(message) {
             document.getElementById('confirmMessage').textContent = message;
             document.getElementById('confirmModal').classList.add('active');
         }
@@ -1421,26 +1451,53 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
             pendingDeleteIndex = null;
         }
 
-        function performDeleteAccount(index) {
-            const accountName = accounts[index].accountName;
-            accounts.splice(index, 1);
-            addLog('🗑 Account Deleted', `Removed account: ${accountName}`);
-            updateStats();
-            updateTable();
+        async function performDeleteAccount(index) {
+            const acc = accounts[index];
+            if (!acc) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Failed to delete account: ${res.statusText}`);
+                }
+
+                addLog('🗑 Account Deleted', `Removed account: ${acc.accountName}`);
+                await fetchAccounts();
+            } catch (err) {
+                console.error('Error deleting account:', err);
+                alert('Failed to delete account from database.');
+            }
         }
 
-        function performDeleteAll() {
+        async function performDeleteAll() {
             const count = accounts.length;
-            accounts = [];
-            addLog('⚠️ Bulk Delete', `Deleted all ${count} accounts`);
-            updateStats();
-            updateTable();
+            if (count === 0) return;
+
+            try {
+                await Promise.all(
+                    accounts.map(acc =>
+                        fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, {
+                            method: 'DELETE'
+                        })
+                    )
+                );
+
+                addLog('⚠️ Bulk Delete', `Deleted all ${count} accounts`);
+                await fetchAccounts();
+            } catch (err) {
+                console.error('Error deleting all accounts:', err);
+                alert('Failed to delete all accounts from database.');
+            }
         }
 
-        async function deleteAccount(index) {
-            const accountName = accounts[index].accountName;
+        function deleteAccount(index) {
+            const acc = accounts[index];
+            if (!acc) return;
             pendingDeleteIndex = index;
-            showConfirmation(`Delete ${accountName}?`);
+            showConfirmation(`Delete ${acc.accountName}?`);
         }
 
         function deleteAllAccounts() {
@@ -1454,6 +1511,11 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         function exportToSheet() {
+            if (accounts.length === 0) {
+                alert('No accounts to export');
+                return;
+            }
+
             const data = accounts.map(acc => ({
                 Account: acc.accountName,
                 Level: acc.stats?.level || 0,
@@ -1488,7 +1550,8 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
         }
 
         async function createNewAccount() {
-            const accountName = document.getElementById('newAccountName').value;
+            const accountNameInput = document.getElementById('newAccountName');
+            const accountName = accountNameInput.value.trim();
             if (!accountName) {
                 alert('Please enter an account name');
                 return;
@@ -1498,15 +1561,27 @@ Status: ${acc.online ? '🟢 Online' : '🔴 Offline'}
                 accountName,
                 stats: { gold: 0, xp: 0, level: 1 },
                 inventory: [],
-                resources: { gems: 0, stars: 0, crystals: 0, dice: 0, shards: 0 },
-                online: true
+                progress: { resources: { gems: 0, stars: 0, crystals: 0, dice: 0, shards: 0 } }
             };
 
-            accounts.push(newAccount);
-            addLog('➕ Account Created', `New account: ${accountName}`);
-            closeModal();
-            updateStats();
-            updateTable();
+            try {
+                const res = await fetch(`${API_URL}/api/accounts/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newAccount)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Failed to create account: ${res.statusText}`);
+                }
+
+                addLog('➕ Account Created', `New account: ${accountName}`);
+                closeModal();
+                await fetchAccounts();
+            } catch (err) {
+                console.error('Error creating account:', err);
+                alert('Failed to save account to database.');
+            }
         }
     </script>
 </body>
