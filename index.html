@@ -938,58 +938,14 @@
                 const res = await fetch(`${API_URL}/api/accounts/${userId}`);
                 const data = await res.json();
                 accounts = data.accounts || [];
-                // If no accounts, load sample data
-                if (accounts.length === 0) {
-                    accounts = getSampleAccounts();
-                }
                 updateStats();
                 updateTable();
             } catch (err) {
                 console.error('Error fetching accounts:', err);
-                // Load sample data on error
-                accounts = getSampleAccounts();
+                accounts = [];
                 updateStats();
                 updateTable();
             }
-        }
-
-        function getSampleAccounts() {
-            return [
-                {
-                    accountName: "Desert_Main",
-                    stats: { gold: 2500000, xp: 5420000, level: 156 },
-                    resources: { gems: 4250, crystals: 1398 },
-                    inventory: [
-                        { name: "Lava King's Warrior Armor", rarity: "epic", type: "chests", levelReq: 156, physicalDamage: 285, health: 420, currentUpgrade: 8, maxUpgrades: 10, sellPrice: 125000, equipped: true },
-                        { name: "Twin Slash", rarity: "epic", type: "abilities", levelReq: 140, sellPrice: 98000 },
-                        { name: "Enhanced Inner Rage", rarity: "legendary", type: "abilities", levelReq: 156, sellPrice: 250000, equipped: true },
-                        { name: "Molten Forged Mage Helmet", rarity: "epic", type: "helmets", levelReq: 140, spellPower: 280, currentUpgrade: 7, maxUpgrades: 10, sellPrice: 87000 },
-                        { name: "Ancient Warrior Sword", rarity: "rare", type: "weapons", levelReq: 120, physicalDamage: 240, currentUpgrade: 5, maxUpgrades: 10, sellPrice: 45000 }
-                    ],
-                    online: true
-                },
-                {
-                    accountName: "Volcano_Alt",
-                    stats: { gold: 850000, xp: 2100000, level: 89 },
-                    resources: { gems: 1200, crystals: 342 },
-                    inventory: [
-                        { name: "Lava Barrage", rarity: "epic", type: "abilities", levelReq: 80, sellPrice: 65000, equipped: true },
-                        { name: "King's Guard Armor", rarity: "uncommon", type: "chests", levelReq: 75, physicalDamage: 180, health: 300, currentUpgrade: 3, maxUpgrades: 10, sellPrice: 25000 },
-                        { name: "Blade Fall", rarity: "epic", type: "abilities", levelReq: 80, sellPrice: 72000 }
-                    ],
-                    online: false
-                },
-                {
-                    accountName: "Grind_Bot",
-                    stats: { gold: 125000, xp: 890000, level: 45 },
-                    resources: { gems: 320, crystals: 85 },
-                    inventory: [
-                        { name: "Pirate Saber", rarity: "common", type: "weapons", levelReq: 30, physicalDamage: 95, currentUpgrade: 1, maxUpgrades: 10, sellPrice: 8000 },
-                        { name: "Frost Wizard Robe", rarity: "uncommon", type: "chests", levelReq: 35, spellPower: 120, health: 180, currentUpgrade: 2, maxUpgrades: 10, sellPrice: 12000, equipped: true }
-                    ],
-                    online: true
-                }
-            ];
         }
 
         function updateStats() {
