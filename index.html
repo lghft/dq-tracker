@@ -322,6 +322,32 @@
             border: 1px solid #666;
         }
 
+        .progress-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .progress-lobby {
+            background: rgba(107, 114, 128, 0.2);
+            color: #9ca3af;
+            border: 1px solid #6b7280;
+        }
+
+        .progress-dungeon {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+
+        .progress-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+
         .action-cell {
             display: flex;
             gap: 8px;
@@ -700,6 +726,7 @@
                                 </th>
                                 <th onclick="sortTable('status')">Status ↑</th>
                                 <th onclick="sortTable('name')">Account Name</th>
+                                <th>Progress</th>
                                 <th onclick="sortTable('level')">Level</th>
                                 <th onclick="sortTable('gold')">Gold</th>
                                 <th>Gems</th>
@@ -710,7 +737,7 @@
                         </thead>
                         <tbody id="tableBody">
                             <tr>
-                                <td colspan="9" class="table-empty">Loading accounts...</td>
+                                <td colspan="10" class="table-empty">Loading accounts...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -811,14 +838,15 @@
 
         /* --- Helper Data Resolvers --- */
         function getAccountOnline(acc) {
+            if (acc.is_online !== undefined) return Boolean(acc.is_online);
             if (acc.online !== undefined) return Boolean(acc.online);
             if (acc.isOnline !== undefined) return Boolean(acc.isOnline);
-            if (acc.status !== undefined) return acc.status === 'online' || acc.status === true;
+            if (acc.status !== undefined && typeof acc.status === 'string') return acc.status === 'online';
             return false;
         }
 
         function getAccountGems(acc) {
-            return acc.gems ?? acc.resources?.gems ?? acc.progress?.resources?.gems ?? acc.stats?.gems ?? 0;
+            return acc.gems ?? acc.stats?.gems ?? acc.resources?.gems ?? acc.progress?.resources?.gems ?? 0;
         }
 
         function getAccountXP(acc) {
@@ -831,6 +859,21 @@
 
         function getAccountLevel(acc) {
             return acc.level ?? acc.stats?.level ?? 1;
+        }
+
+        /* --- Updated Postgres Progress JSONB Evaluator --- */
+        function getAccountProgress(acc) {
+            const progressData = acc.progress || {};
+            const dungeonName = (progressData.dungeonName ?? acc.dungeonName ?? "").trim();
+            const placeId = String(progressData.placeId ?? acc.placeId ?? "");
+            const status = progressData.status ?? acc.status ?? false;
+
+            const isInDungeon = dungeonName !== "" && placeId === "85776757589518";
+
+            if (isInDungeon) {
+                return (status === true || status === "true") ? "Active Dungeon" : "In Dungeon";
+            }
+            return "In Lobby";
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -848,7 +891,6 @@
         /* --- Auto Refresh Polling Timer --- */
         function startAutoRefreshTimer() {
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-            // Polling interval auto-refreshes data every 5 seconds
             autoRefreshInterval = setInterval(() => {
                 fetchAccounts();
             }, 5000);
@@ -870,7 +912,6 @@
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    // Fetch accounts automatically on any backend event update
                     fetchAccounts();
                 } catch (err) {
                     console.error('Error handling WS message:', err);
@@ -995,7 +1036,6 @@
                 updateTable();
                 populateAccountFilter();
 
-                // Dynamically refresh active tab view if open
                 const itemsTab = document.getElementById('tab-items');
                 if (itemsTab && itemsTab.classList.contains('active')) {
                     renderItemsTab();
@@ -1010,21 +1050,21 @@
 
         /* --- Inventory Comparison Engine --- */
         function checkInventoryChanges(oldAccs, newAccs) {
-            const oldMap = new Map(oldAccs.map(acc => [acc.accountName, acc.inventory || []]));
+            const getAccName = acc => acc.accountName || acc.account_name || 'Unknown';
+            const oldMap = new Map(oldAccs.map(acc => [getAccName(acc), acc.inventory || []]));
 
             newAccs.forEach(newAcc => {
-                const oldInv = oldMap.get(newAcc.accountName);
+                const accName = getAccName(newAcc);
+                const oldInv = oldMap.get(accName);
                 if (!oldInv) return;
 
                 const newInv = newAcc.inventory || [];
-                
-                // Compare by unique item identifier (id, uuid, or name)
                 const getItemKey = item => item.id || item.uuid || `${item.name}_${item.rarity}`;
                 const oldItemKeys = new Set(oldInv.map(getItemKey));
 
                 newInv.forEach(item => {
                     if (!oldItemKeys.has(getItemKey(item))) {
-                        addLog('🎒 New Item Acquired', `[${newAcc.accountName}] obtained: ${item.name || 'Unknown Item'} (${item.rarity || 'common'})`);
+                        addLog('🎒 New Item Acquired', `[${accName}] obtained: ${item.name || 'Unknown Item'} (${item.rarity || 'common'})`);
                     }
                 });
             });
@@ -1084,8 +1124,9 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
             let filtered = accounts.filter(acc => {
+                const accName = acc.accountName || acc.account_name || '';
                 const isOnline = getAccountOnline(acc);
-                const matchesSearch = acc.accountName.toLowerCase().includes(searchTerm);
+                const matchesSearch = accName.toLowerCase().includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || 
                     (currentFilter === 'online' && isOnline) ||
                     (currentFilter === 'offline' && !isOnline);
@@ -1094,11 +1135,13 @@
 
             const sortBy = document.getElementById('sortBy').value;
             filtered.sort((a, b) => {
+                const nameA = a.accountName || a.account_name || '';
+                const nameB = b.accountName || b.account_name || '';
                 switch(sortBy) {
                     case 'level': return getAccountLevel(b) - getAccountLevel(a);
                     case 'gold': return getAccountGold(b) - getAccountGold(a);
                     case 'xp': return getAccountXP(b) - getAccountXP(a);
-                    default: return a.accountName.localeCompare(b.accountName);
+                    default: return nameA.localeCompare(nameB);
                 }
             });
 
@@ -1113,13 +1156,19 @@
 
             const tbody = document.getElementById('tableBody');
             if (pageAccounts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="table-empty">No accounts found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="table-empty">No accounts found</td></tr>';
             } else {
                 tbody.innerHTML = pageAccounts.map((acc) => {
+                    const accName = acc.accountName || acc.account_name || 'Unknown';
                     const online = getAccountOnline(acc);
                     const gems = getAccountGems(acc);
                     const gold = getAccountGold(acc);
                     const level = getAccountLevel(acc);
+                    const progressText = getAccountProgress(acc);
+
+                    let progressClass = 'progress-lobby';
+                    if (progressText === 'Active Dungeon') progressClass = 'progress-active';
+                    else if (progressText === 'In Dungeon') progressClass = 'progress-dungeon';
 
                     return `
                     <tr>
@@ -1129,7 +1178,12 @@
                                 ${online ? '● Online' : '● Offline'}
                             </span>
                         </td>
-                        <td><span class="account-name">${acc.accountName}</span></td>
+                        <td><span class="account-name">${accName}</span></td>
+                        <td>
+                            <span class="progress-badge ${progressClass}">
+                                ⚔️ ${progressText}
+                            </span>
+                        </td>
                         <td><span class="level-badge">Lvl ${level}</span></td>
                         <td class="stat-cell">💰 ${gold.toLocaleString()}</td>
                         <td class="stat-cell">💎 ${gems.toLocaleString()}</td>
@@ -1156,7 +1210,7 @@
             document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
         }
 
-        /* --- Items Tab with Individual Account Dropdown Filter --- */
+        /* --- Items Tab --- */
         function populateAccountFilter() {
             const dropdown = document.getElementById('itemAccountFilter');
             if (!dropdown) return;
@@ -1165,9 +1219,10 @@
             dropdown.innerHTML = '<option value="all">All Accounts</option>';
             
             accounts.forEach(acc => {
+                const accName = acc.accountName || acc.account_name || 'Unknown';
                 const opt = document.createElement('option');
-                opt.value = acc.accountName;
-                opt.textContent = acc.accountName;
+                opt.value = accName;
+                opt.textContent = accName;
                 dropdown.appendChild(opt);
             });
 
@@ -1177,11 +1232,12 @@
         function renderItemsTab() {
             const allItemsList = [];
             accounts.forEach(acc => {
+                const accName = acc.accountName || acc.account_name || 'Unknown';
                 if (acc.inventory && acc.inventory.length > 0) {
                     acc.inventory.forEach(item => {
                         allItemsList.push({
                             ...item,
-                            accountName: acc.accountName
+                            accountName: accName
                         });
                     });
                 }
@@ -1243,12 +1299,9 @@
                 let upgradeCost = 0;
         
                 if (!isAbility && isHighRarity && !isMaxed) {
-                    // Potential Stat (+10 per remaining upgrade)
                     if (baseStat > 0) {
                         potValue = baseStat + (remainingUpgrades * 10);
                     }
-        
-                    // Total Upgrade Cost via Dungeon Quest Blacksmith formula
                     if (item.upgradeCost !== undefined && item.upgradeCost !== null) {
                         upgradeCost = item.upgradeCost;
                     } else {
@@ -1321,8 +1374,9 @@
         function viewAccount(index) {
             const acc = accounts[index];
             if (!acc) return;
-            addLog('👁 Account Viewed', `Inspected: ${acc.accountName}`);
-            alert(`Account: ${acc.accountName}\nLevel: ${getAccountLevel(acc)}\nGold: ${getAccountGold(acc).toLocaleString()}\nXP: ${getAccountXP(acc).toLocaleString()}\nGems: ${getAccountGems(acc).toLocaleString()}\nItems: ${acc.inventory?.length || 0}\nStatus: ${getAccountOnline(acc) ? '🟢 Online' : '🔴 Offline'}`);
+            const accName = acc.accountName || acc.account_name || 'Unknown';
+            addLog('👁 Account Viewed', `Inspected: ${accName}`);
+            alert(`Account: ${accName}\nLevel: ${getAccountLevel(acc)}\nGold: ${getAccountGold(acc).toLocaleString()}\nXP: ${getAccountXP(acc).toLocaleString()}\nGems: ${getAccountGems(acc).toLocaleString()}\nProgress: ${getAccountProgress(acc)}\nItems: ${acc.inventory?.length || 0}\nStatus: ${getAccountOnline(acc) ? '🟢 Online' : '🔴 Offline'}`);
         }
 
         let pendingDeleteIndex = null;
@@ -1349,11 +1403,12 @@
         async function performDeleteAccount(index) {
             const acc = accounts[index];
             if (!acc) return;
+            const accName = acc.accountName || acc.account_name;
 
             try {
-                const res = await fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, { method: 'DELETE' });
+                const res = await fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(accName)}`, { method: 'DELETE' });
                 if (!res.ok) throw new Error(`Failed to delete: ${res.statusText}`);
-                addLog('🗑 Account Deleted', `Removed account: ${acc.accountName}`);
+                addLog('🗑 Account Deleted', `Removed account: ${accName}`);
                 await fetchAccounts();
             } catch (err) {
                 alert('Failed to delete account.');
@@ -1363,7 +1418,10 @@
         async function performDeleteAll() {
             if (accounts.length === 0) return;
             try {
-                await Promise.all(accounts.map(acc => fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(acc.accountName)}`, { method: 'DELETE' })));
+                await Promise.all(accounts.map(acc => {
+                    const accName = acc.accountName || acc.account_name;
+                    return fetch(`${API_URL}/api/accounts/${userId}/${encodeURIComponent(accName)}`, { method: 'DELETE' });
+                }));
                 addLog('⚠️ Bulk Delete', `Deleted all accounts`);
                 await fetchAccounts();
             } catch (err) {
@@ -1373,7 +1431,8 @@
 
         function deleteAccount(index) {
             pendingDeleteIndex = index;
-            showConfirmation(`Delete ${accounts[index]?.accountName}?`);
+            const accName = accounts[index]?.accountName || accounts[index]?.account_name || 'Account';
+            showConfirmation(`Delete ${accName}?`);
         }
 
         function deleteAllAccounts() {
@@ -1390,11 +1449,12 @@
             if (accounts.length === 0) return alert('No accounts to export');
 
             const data = accounts.map(acc => ({
-                Account: acc.accountName,
+                Account: acc.accountName || acc.account_name || 'Unknown',
                 Level: getAccountLevel(acc),
                 Gold: getAccountGold(acc),
                 XP: getAccountXP(acc),
                 Gems: getAccountGems(acc),
+                Progress: getAccountProgress(acc),
                 Items: acc.inventory?.length || 0,
                 Status: getAccountOnline(acc) ? 'Online' : 'Offline'
             }));
@@ -1427,10 +1487,10 @@
 
             const newAccount = {
                 accountName,
-                online: false,
+                is_online: false,
                 stats: { gold: 0, xp: 0, level: 1 },
                 inventory: [],
-                progress: { resources: { gems: 0, stars: 0, crystals: 0 } }
+                progress: { jobId: "", status: false, placeId: "", dungeonName: "" }
             };
 
             try {
